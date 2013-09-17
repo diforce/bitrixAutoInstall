@@ -1,0 +1,1 @@
+[response]window.ajaxForm.SetStatus('35'); window.ajaxForm.Post('compression', 'database','Установка модуля &quot;Компрессия&quot; (данные БД)');[/response]

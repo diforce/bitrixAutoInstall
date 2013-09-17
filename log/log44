@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>1С-Битрикс: Управление сайтом 12.5.1</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<noscript>
+			<style type="text/css">
+				div {display: none;}
+				#noscript {padding: 3em; font-size: 130%; background:white;}
+			</style>
+			<p id="noscript">Для установки продукта необходимо включить JavaScript. По-видимому, JavaScript либо не поддерживается браузером, либо отключен. Измените настройки браузера и затем <a href="">повторите попытку</a>.</p>
+		</noscript>
+		<link rel="stylesheet" href="/bitrix/images/install/installer_style.css">
+		<script type="text/javascript">
+		<!--
+			document.onkeydown = EnterKeyPress;
+
+			function EnterKeyPress(event)
+			{
+				if (!document.getElementById)
+					return;
+
+				if (window.event)
+					event = window.event;
+
+				var sourceElement = (event.target? event.target : (event.srcElement? event.srcElement : null));
+
+				if (!sourceElement || sourceElement.tagName.toUpperCase() == "TEXTAREA")
+					return;
+
+				var key = (event.keyCode ? event.keyCode : (event.which ? event.which : null) );
+				if (!key)
+					return;
+
+				if (key == 13)
+				{
+					CancelBubble(event);
+				}
+				else if (key == 39 && event.ctrlKey)
+				{
+					var nextButton = document.forms["__wizard_form"].elements["StepNext"];
+					if (nextButton)
+					{
+						nextButton.click();
+						CancelBubble(event);
+					}
+				}
+				else if (key == 37 && event.ctrlKey)
+				{
+					var prevButton = document.forms["__wizard_form"].elements["StepPrevious"];
+					if (prevButton)
+					{
+						prevButton.click();
+						CancelBubble(event);
+					}
+				}
+			}
+
+			function CancelBubble(event)
+{
+	if (event.stopPropagation)
+	{
+		event.preventDefault();
+		event.stopPropagation();
+	}
+	else
+	{
+		event.cancelBubble = true;
+		event.returnValue = false;
+	}
+}
+
+function NeedRootUser()
+{
+	var createUser = document.getElementById("create_user_Y");
+	var createDB = document.getElementById("create_db_Y");
+
+	if (createUser.checked || (createDB && createDB.checked))
+	{
+		document.getElementById("line1").style.display='';
+		document.getElementById("line2").style.display='';
+		document.getElementById("line3").style.display='';
+	}
+	else
+	{
+		document.getElementById("line1").style.display='none';
+		document.getElementById("line2").style.display='none';
+		document.getElementById("line3").style.display='none';
+	}
+
+	var existDB = document.getElementById("db_exists");
+	var newDB = document.getElementById("db_new");
+	if(existDB && newDB)
+	{
+		existDB.style.display = !createDB.checked? 'block': 'none';
+		newDB.style.display = createDB.checked? 'block': 'none';
+	}
+}
+
+function NeedUTFSection(dbType)
+{
+	if (dbType == "mssql" || dbType == "mssql_native")
+	{
+		document.getElementById("utf-row-two").style.display='none';
+		document.getElementById("utf-row-one").style.display='none';
+		document.getElementById("utf8_inst").checked=false;
+		document.getElementsByName("__wiz_utf8")[0].value="";
+	}
+	else
+	{
+		document.getElementById("utf-row-one").style.display='';
+		document.getElementById("utf-row-two").style.display='';
+	}
+
+}
+
+function htmlspecialchars(str)
+{
+	if (typeof(str)!='string')
+		return str;
+	str = str.replace(/&/g, '&amp;');
+	str = str.replace(/"/g, '&quot;');
+	str = str.replace(/</g, '&lt;');
+	str = str.replace(/>/g, '&gt;');
+	return str;
+}
+
+function strip_tags(str)
+{
+	return str.replace(/<\/?[^>]+>/gi, '');
+}
+
+
+function CAjaxForm(formName, target, hiddenField)
+{
+	var form = document.forms[formName];
+	if (!form)
+		 form = document.getElementById(formName);
+
+	this.nextStep = form.elements[hiddenField];
+	this.nextStepStage = form.elements[hiddenField+"Stage"];
+	this.iframe = document.getElementById(target);
+	this.form = form;
+	this.form.target = target;
+	var _this = this;
+
+	if (this.iframe.attachEvent) //IE
+		this.iframe.attachEvent("onload", function() {_this.AjaxHandler()});
+	else
+		this.iframe.onload = function() {_this.AjaxHandler()};
+
+	this.percent = null;
+	this.percent2 = null;
+	this.indicator = null;
+	this.status = null;
+}
+
+CAjaxForm.prototype.AjaxHandler = function()
+{
+	//opera triggers onload event even on empty iframe
+	if(this.iframe.contentWindow && this.iframe.contentWindow.location.href.indexOf('http') != 0)
+		return;
+
+	if (this.iframe.contentDocument)
+		var iframeDocument = this.iframe.contentDocument;
+	else
+		var iframeDocument = this.iframe.contentWindow.document;
+
+	var response = iframeDocument.body.innerHTML;
+	if (response.length == 0 || iframeDocument.getElementById("bitrix_install_template"))
+	{
+		this.ShowError("Connection error. Empty response.");
+		return;
+	}
+
+	var regexpStart = new RegExp('\\[response\\]', 'i');
+	var regexpEnd = new RegExp('\\[\/response\\]', 'i');
+
+	var matchResponse = response.match(regexpStart);
+
+	if (matchResponse === null)
+	{
+		this.ShowError(response);
+		return;
+	}
+
+	var start = matchResponse.index + matchResponse[0].length;
+	var end = response.search(regexpEnd);
+	if (end == -1)
+	{
+		this.ShowError(response);
+		return;
+	}
+
+	response = response.substr(start, end-start);
+
+	//if (window.execScript)
+	//	window.execScript(response, 'javascript');
+	//else
+	window.eval(response);
+}
+
+CAjaxForm.prototype.ShowError = function(errorMessage)
+{
+	var errorContainer = document.getElementById("error_container");
+	var errorText = document.getElementById("error_text");
+	if (!errorContainer || !errorText)
+		return;
+
+	var waitWindow = document.getElementById("wait");
+	if (waitWindow)
+		waitWindow.style.display = "none";
+
+	errorContainer.style.display = 'block';
+	errorText.innerHTML = strip_tags(errorMessage);
+
+	var retryButton = document.getElementById("error_retry_button");
+	var skipButton = document.getElementById("error_skip_button");
+
+	var _this = this;
+	var nextStep = this.nextStep.value;
+	var nextStepStage = this.nextStepStage.value;
+
+	retryButton.onclick = function() {_this.HideError(); _this.Post(nextStep, nextStepStage,'');};
+
+	if (nextStep == "main")
+		skipButton.onclick = function() {_this.HideError(); _this.Post(nextStep, nextStepStage,'');};
+	else
+		skipButton.onclick = function() {_this.HideError(); _this.Post(nextStep, 'skip','');};
+}
+
+CAjaxForm.prototype.HideError = function()
+{
+	var errorContainer = document.getElementById("error_container");
+	var errorText = document.getElementById("error_text");
+	if (!errorContainer || !errorText)
+		return;
+
+	while (errorText.firstChild)
+		errorText.removeChild(errorText.firstChild);
+
+	errorContainer.style.display = 'none';
+
+	var waitWindow = document.getElementById("wait");
+	if (waitWindow)
+		waitWindow.style.display = "block";
+}
+
+CAjaxForm.prototype.Post = function(nextStep, nextStepStage, status)
+{
+	if (nextStep)
+		this.nextStep.value = nextStep;
+
+	if (nextStepStage)
+		this.nextStepStage.value = nextStepStage;
+
+	this.form.submit();
+
+	if (!this.status)
+		this.status = document.getElementById("status");
+
+	if (status.length > 0)
+		this.status.innerHTML = status + "...";
+}
+
+CAjaxForm.prototype.StopAjax = function()
+{
+	this.iframe.onload = null;
+	this.form.target = "_self";
+}
+
+CAjaxForm.prototype.SetStatus = function(percent, status)
+{
+	if (!this.percent)
+		this.percent = document.getElementById("percent");
+	if (!this.percent2)
+		this.percent2 = document.getElementById("percent2");
+
+	if (!this.indicator)
+		this.indicator = document.getElementById("indicator");
+
+	if (!this.status)
+		this.status = document.getElementById("status");
+	this.status.innerHTML = status;
+
+	if (this.percent)
+		this.percent.innerHTML = percent + "%";
+	if (this.percent2)
+		this.percent2.innerHTML = percent + "%";
+	this.indicator.style.width = percent + "%";
+}
+
+function OnBeforeUserExit(event)
+{
+	if (!event)
+		var event = window.event;
+
+	event.returnValue = warningBeforeOnload;
+}
+
+
+function PreloadImages()
+{
+	var preloadImages = ["prev.gif", "error.gif", "wait.gif", "admin.gif", "public.gif"];
+
+	for (var imageIndex = 0; imageIndex < preloadImages.length; imageIndex++)
+	{
+		var imageObj = new Image();
+		imageObj.src = "/bitrix/images/install/" + preloadImages[imageIndex];
+	}
+}
+
+			
+		//-->
+		</script>
+
+
+	</head>
+
+<body id="bitrix_install_template">
+<table class="installer-main-table" id="container">
+	<tr>
+		<td class="installer-main-table-cell">
+			<div class="installer-block-wrap">
+				<div class="installer-block">
+					<form action="/" enctype="multipart/form-data" method="post" name="__wizard_form" id="__wizard_form"><input type="hidden" name="CurrentStepID" value="load_module"><input type="hidden" name="__wiz_agree_license" value="Y">
+			<input type="hidden" name="__wiz_dbType" value="mysql">
+			<input type="hidden" name="__wiz_lic_key_variant" value="Y">
+			<input type="hidden" name="__wiz_utf8" value="Y">
+			<input type="hidden" name="__wiz_license" value="S12-ML-4PUYB26Z2GLWRK3Z">
+			<input type="hidden" name="__wiz_host" value="localhost">
+			<input type="hidden" name="__wiz_create_user" value="N">
+			<input type="hidden" name="__wiz_user" value="root">
+			<input type="hidden" name="__wiz_password" value="qwerty">
+			<input type="hidden" name="__wiz_create_database" value="Y">
+			<input type="hidden" name="__wiz_database" value="new_database">
+			<input type="hidden" name="__wiz_create_database_type" value="">
+			<input type="hidden" name="__wiz_root_user" value="root">
+			<input type="hidden" name="__wiz_root_password" value="qwerty">
+			<input type="hidden" name="__wiz_file_access_perms" value="0600">
+			<input type="hidden" name="__wiz_folder_access_perms" value="0700">
+			<input type="hidden" name="__wiz_nextStep" value="__finish">
+			<input type="hidden" name="__wiz_nextStepStage" value="single">
+			<input type="hidden" name="__wiz_login" value="admin">
+			<input type="hidden" name="__wiz_admin_password" value="qwerty">
+			<input type="hidden" name="__wiz_admin_password_confirm" value="qwerty">
+			<input type="hidden" name="__wiz_email" value="qwe@qwe.qwe">
+			<input type="hidden" name="__wiz_user_name" value="qwe">
+			<input type="hidden" name="__wiz_user_surname" value="qwe">
+			<input type="hidden" name="__wiz_selected_wizard" value="@">
+			<input type="hidden" name="NextStepID" value="select_wizard1">
+					<table class="installer-block-table">
+						<tr>
+							<td class="installer-block-cell-left">
+								<table class="inst-left-side-img-table">
+									<tr>
+										<td class="inst-left-side-img-cell"><img src="/bitrix/images/install/ru/box-new.jpg" alt="" /></td>
+									</tr>
+								</table>
+								<div class="inst-sequence-steps">
+			<div class="inst-sequence-step-item inst-past-stage"><span class="inst-sequence-step-num">1</span><span class="inst-sequence-step-text">Начало установки</span></div>
+			<div class="inst-sequence-step-item inst-past-stage"><span class="inst-sequence-step-num">2</span><span class="inst-sequence-step-text">Лицензионное соглашение</span></div>
+			<div class="inst-sequence-step-item inst-past-stage"><span class="inst-sequence-step-num">3</span><span class="inst-sequence-step-text">Регистрация продукта</span></div>
+			<div class="inst-sequence-step-item inst-past-stage"><span class="inst-sequence-step-num">4</span><span class="inst-sequence-step-text">Предварительная проверка</span></div>
+			<div class="inst-sequence-step-item inst-past-stage"><span class="inst-sequence-step-num">5</span><span class="inst-sequence-step-text">Создание базы данных</span></div>
+			<div class="inst-sequence-step-item inst-past-stage"><span class="inst-sequence-step-num">6</span><span class="inst-sequence-step-text">Установка продукта</span></div>
+			<div class="inst-sequence-step-item inst-past-stage"><span class="inst-sequence-step-num">7</span><span class="inst-sequence-step-text">Создание администратора</span></div>
+			<div class="inst-sequence-step-item inst-past-stage"><span class="inst-sequence-step-num">8</span><span class="inst-sequence-step-text">Выберите решение для установки</span></div>
+			<div class="inst-sequence-step-item inst-active-step"><span class="inst-sequence-step-num">9</span><span class="inst-sequence-step-text">Выбор решения</span></div>
+			<div class="inst-sequence-step-item"><span class="inst-sequence-step-num">10</span><span class="inst-sequence-step-text">Загрузка решения</span></div>
+			<div class="inst-sequence-step-item"><span class="inst-sequence-step-num">11</span><span class="inst-sequence-step-text">Выберите решение для установки</span></div></div>
+							</td>
+							<td class="installer-block-cell-right">
+								<div class="inst-title-block">
+									<div class="inst-title-label">Установка продукта</div>
+									<div class="inst-title">1С-Битрикс: Управление сайтом 12.5.1</div>
+								</div>
+								<div class="inst-cont-title-wrap">
+									<div class="inst-cont-title">Выбор решения</div>
+									
+								</div>
+								<div id="step-content">
+									
+									
+		<script type="text/javascript">
+			function SelectSolutionMP(element, solutionId)
+			{
+				var hidden = document.getElementById("id___wiz_selected_module");
+				hidden.value = solutionId;
+
+				var container = document.getElementById("solutions-container");
+				var anchors = container.getElementsByTagName("TD");
+				for (var i = 0; i < anchors.length; i++)
+				{
+					anchors[i].className = "inst-module-cell";
+				}
+
+				element.parentNode.className = "inst-module-cell inst-module-cell-active";
+
+				document.getElementById("id_radio_"+solutionId).checked=true;
+			}
+		</script>
+		<table class="inst-module-table" id="solutions-container"><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'bitrix.eshop');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Современный интернет-магазин</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/058/80_80_1/ava_for_marketplace.png" /></div>
+								<div class="inst-module-text-mp">Готовый интернет-магазин, включающий в себя новые яркие шаблоны дизайнов, а также уникальные возможности для повышения эффективности бизнеса, помогающие продавать через Интернет. 
+
+Хиты, новинки, категории товаров, варианты SKU, несколько вариантов мен...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/bitrix.eshop/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_bitrix.eshop" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'nsandrey.emptyinstall');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Чистая установка &quot;1С-Битрикс&quot;</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/9d0/80_80_1/solution.png" /></div>
+								<div class="inst-module-text-mp">Решение позволяет получить &quot;чистую&quot; редакцию &quot;1С-Битрикс&quot;: без типового решения, без демо-данных, с пустым шаблоном и выборочно установленными модулями ( остальные Вы потом сможете установить вручную ...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/nsandrey.emptyinstall/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_nsandrey.emptyinstall" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'makarovpro.temp437');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Корпоративный сайт (temp437)</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/a6a/80_80_1/1.png" /></div>
+								<div class="inst-module-text-mp">Корпоративный сайт на примере продукции компании «Apple» – это готовое решение, которое выполнено на самой последней версии «1С-Битрикс: Управление сайтом 12.x», позволяет быстро и просто создать представительство компании в Интернет...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/makarovpro.temp437/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_makarovpro.temp437" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'v1rt.personal');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Персональный сайт \ Сайт-визитка</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/2b1/80_80_1/thumb160.png" /></div>
+								<div class="inst-module-text-mp">Простой и удобный в использовании персональный сайт с возможностью его применения в качестве сайта-визитки для представительства своей фирмы в интернете. Отличный шанс для вас получить качественный сайт на 1С-Битрикс по минимальной цене, т.к. это готовое решение ...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/v1rt.personal/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_v1rt.personal" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'areal.realty');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Ареал:Типовой сайт агентства недвижимости</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/99d/80_80_1/agentstvo512.png" /></div>
+								<div class="inst-module-text-mp">Типовой сайт агентства недвижимости. Минимальная редакция для использования - «Стандарт».
+
+Наше решение для вас – это:
+1. Создание образа надежной компании:
+- продуманная структура сайта и удобная навигация;...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/areal.realty/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_areal.realty" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'yenisite.migrator');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">CMS Конвертер</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/fe6/80_80_1/!migrate_128.png" /></div>
+								<div class="inst-module-text-mp">------------------------------------------------------------------------------------------...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/yenisite.migrator/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_yenisite.migrator" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'webdoka.smartrealt');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Сайт агентства недвижимости</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/bd6/80_80_1/box.jpg" /></div>
+								<div class="inst-module-text-mp">Готовый сайт агентства недвижимости включает в себя:
+1) Удобный каталог объектов недвижимости с рубрикатором и формой поиска.
+2) Детальная страница объекта с подробной информацией, фотографиями и возможностью отправки заявки.
+3) Бе...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/webdoka.smartrealt/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_webdoka.smartrealt" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'webrover.child');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Сайт детского сада</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/52a/80_80_1/solution.gif" /></div>
+								<div class="inst-module-text-mp">Мастер создания сайта детского сада</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/webrover.child/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_webrover.child" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'bitrix.schoolsite');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Сайт школы, базовый</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/1bf/80_80_1/sait_shkoly.png" /></div>
+								<div class="inst-module-text-mp">1C-Битрикс: Сайт школы, базовый.
+
+Готовое решение, которое включает в себя  3 шаблона дизайна и адаптированную структуру сайта образовательного учреждения.
+
+Шаблоны и структура сайта соответствует решению &quot;1...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/bitrix.schoolsite/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_bitrix.schoolsite" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'aqw.freesite');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Типовой сайт услуг</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/dc0/80_80_1/31e56e0a0a88c17eda035ea4281f5a57.jpg" /></div>
+								<div class="inst-module-text-mp">Типовой сайт услуг вашей компании. Минимальная редакция для использования - «Старт».</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/aqw.freesite/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_aqw.freesite" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'twinpx.bejetservice');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Сайт cервисной компании</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/3f1/80_80_1/service_template.gif" /></div>
+								<div class="inst-module-text-mp">Готовый сайт сервисной компании. Сайт пойдет для компаний занимающихся обслуживанием бытовой техники, ремонтом помещений или любыми другими бытовыми услугами.
+
+Разделы сайта:
+— Компания;
+— Услуги;
+— События;
+— Адреса...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/twinpx.bejetservice/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_twinpx.bejetservice" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'metamax.clinic');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Сайт медицинской клиники</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/update/233/logo.gif" /></div>
+								<div class="inst-module-text-mp">Типовое решение для лечебных учреждений, клиник. Легкий и понятный сайт позволит быстро получить самую необходимую информацию для всех, кому нужна квалифицированная медицинская помощь.
+Основные разделы: услуги и специалисты, диагностика и анал...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/metamax.clinic/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_metamax.clinic" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'maevrika.avtoservice');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Сайт Автосервиса</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/update/74f/avtoservice.png" /></div>
+								<div class="inst-module-text-mp">Сайт реального боевого проекта, занимает лидирующие позиции по району обитания клиентов, грамотно перелинкован и оптимизирован. ОБЯЗАТЕЛЬНО ИЗМЕНИТЕ ТЕКСТЫ!
+Решение рассчитано на редакцию &quot;Старт&quot;.
+В ...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/maevrika.avtoservice/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_maevrika.avtoservice" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'mlife.foto1');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Персональный сайт фотографа</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/e66/80_80_1/icon1.jpg" /></div>
+								<div class="inst-module-text-mp">Разрабатывая данный продукт, стояла цель сделать простое, готовое решение для фотографов, превосходящее многие уже существующие сайты, как по дизайну, так и по быстродействию, удобству и креативности.
+Мы планировали продавать это решение. Но когда решение...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/mlife.foto1/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_mlife.foto1" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'itees.siteffc');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Itees: Типовой сайт транспортно-экспедиционной компании</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/525/80_80_1/02.gif" /></div>
+								<div class="inst-module-text-mp">Решение подойдет большинству компаний, оказывающих транспортно-экспедиционные услуги. Для его создания, мы проанализировали множество сайтов компаний, оказывающих услуги в данном направлении и на основе полученных данных постарались создать решение, которое п...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/itees.siteffc/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_itees.siteffc" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'webrover.flowers');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Сайт цветочного магазина</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/6a1/80_80_1/solution.gif" /></div>
+								<div class="inst-module-text-mp">Мастер создания сайта цветочного магазина</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/webrover.flowers/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_webrover.flowers" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'smedia.suz');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Типовой сайт колледжа</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/304/80_80_1/smedia.suz.png" /></div>
+								<div class="inst-module-text-mp">Типовое решение для учреждений среднего профессионального образования, способное решить целый ряд задач как для преподавателей, так и для учащихся и их родителей. 
+
+Быстро, легко, а главное эффективно Вы сможете организовать поддержку учебного процесса и коммуникаци...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/smedia.suz/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_smedia.suz" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'citrus.tszhstart');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">1С:Сайт управляющей компании ЖКХ, ТСЖ и ЖСК. Редакция «Старт»</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/f2d/80_80_1/start.png" /></div>
+								<div class="inst-module-text-mp">«1С: Сайт управляющей компании ЖКХ, ТСЖ и ЖСК» — программный продукт, предназначенный для комплексного решения проблемы повышения качества обслуживания потребителей и прозрачности работы организаций в сфере жилищно-коммунального хозяйства любого ...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/citrus.tszhstart/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_citrus.tszhstart" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'span.stcc');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Типовой сайт благотворительной организации</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/ad7/80_80_1/solution.png" /></div>
+								<div class="inst-module-text-mp">Типовой сайт благотворительной организации. Минимальная редакция для использования решения — 1С-Битрикс «Старт».
+
+Данное решение позволит Вам самостоятельно создать сайт Вашей благотворительной организации в короткие сроки.
+...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/span.stcc/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_span.stcc" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'design2u.stindustrial');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Сайт промышленной компании</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/503/80_80_1/img_160x160_.jpg" /></div>
+								<div class="inst-module-text-mp">Готовый сайт промышленной компании включает в себя:
+1.Шаблон с настраиваемыми данными 
+2.Мастер создания и настройки сайта
+3.Демонстрационные данные
+4.Функционал заказа без организации 
+интернет магазина(посредством ...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/design2u.stindustrial/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_design2u.stindustrial" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'twinpx.bejetevent');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Сайт event-агентства</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/434/80_80_1/event_5_prev.jpg" /></div>
+								<div class="inst-module-text-mp">Сай event-агентства подойдет для компаний занимающихся организацией праздников, презентаций и других массовых мероприятий.
+
+В сайт включены разделы:
+— Об агентстве;
+— Наши услуги; 
+— События и отчеты; 
+— Ад...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/twinpx.bejetevent/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_twinpx.bejetevent" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'yenisite.autoschool');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Типовой сайт автошколы</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/699/80_80_1/autoschool.png" /></div>
+								<div class="inst-module-text-mp">Типовое решение &quot;Сайт автошколы&quot;.
+
+- содержит все типовые разделы
+- для установке бесплатной версии достаточно редакции &quot;Старт&quot;
+- основные разделы сайта:
+Об автошк...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/yenisite.autoschool/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_yenisite.autoschool" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'webrover.salon');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Салон красоты</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/8a7/80_80_1/solution.gif" /></div>
+								<div class="inst-module-text-mp">Сайт салона красоты</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/webrover.salon/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_webrover.salon" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'citrus.tszhstandard');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">1С:Сайт управляющей компании ЖКХ, ТСЖ и ЖСК. Редакция «Стандарт»</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/6d9/80_80_1/srandart.png" /></div>
+								<div class="inst-module-text-mp">«1С: Сайт управляющей компании ЖКХ, ТСЖ и ЖСК» — программный продукт, предназначенный для комплексного решения проблемы повышения качества обслуживания потребителей и прозрачности работы организаций в сфере жилищно-коммунального хозяйства любого ...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/citrus.tszhstandard/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_citrus.tszhstandard" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'citrus.tszhb');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">1С:Сайт управляющей компании ЖКХ, ТСЖ и ЖСК. Редакция «Бизнес»</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/9c8/80_80_1/biz.png" /></div>
+								<div class="inst-module-text-mp">«1С: Сайт управляющей компании ЖКХ, ТСЖ и ЖСК» — программный продукт, предназначенный для комплексного решения проблемы повышения качества обслуживания потребителей и прозрачности работы организаций в сфере жилищно-коммунального хозяйства любого ...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/citrus.tszhb/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_citrus.tszhb" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'spichka.solsushimarket');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Студия СПИЧКА: Суши-маркет</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/927/80_80_1/korobka_big-logo.png" /></div>
+								<div class="inst-module-text-mp">Интернет-магазин для ресторана японской кухни:
+- готовый сайт ресторана «Суши»;
+- оформление заказа в режиме онлайн;
+- легкий дизайн;
+- удобная навигация.
+Открытие интернет-магазина – быстро и просто. Замените типо...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/spichka.solsushimarket/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_spichka.solsushimarket" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'mcart.watchshop');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Часы. Готовый интернет-магазин</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/207/80_80_1/market4.jpg" /></div>
+								<div class="inst-module-text-mp">Готовый интернет магазин по продаже часов – это решение, выполненное на последней редакции 1С-Битрикс 12.0 включающее в себя все основные преимущества новой системы управления сайтом с современным приятным для глаз дизайном и удобным интуитивно поня...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/mcart.watchshop/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_mcart.watchshop" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'colors3.hotel');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Готовое решение: сайт отеля</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/645/80_80_1/screen.gif" /></div>
+								<div class="inst-module-text-mp">Это решение отлично подходит для отелей средних и малых размеров.
+Имеет 4 цветовых решения.
+
+Функционал:
+- Модуль типов номеров
+- Отзывы
+- Новости
+- Баннеры на главной странице
+- Фотогалерея
+- Форма обратной связ...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/colors3.hotel/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_colors3.hotel" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'gendalf.consulting');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">ГЭНДАЛЬФ: Сайт консалтинговой компании</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/update/213/solution80.png" /></div>
+								<div class="inst-module-text-mp">Современный сайт для компании, оказывающей консалтинговые услуги:
+- Достаточно редакции &quot;Старт&quot;
+- Ваш сайт полностью готов за 5 минут
+- Удобная структура и необходимые сервисы сайта уже придуманы и реализованы:
+ ...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/gendalf.consulting/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_gendalf.consulting" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'bizprofi.hotel');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Сайт гостиницы и пансионата</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/d1f/80_80_1/zmf.png" /></div>
+								<div class="inst-module-text-mp">ФУНКЦИОНАЛ:
+
+Полный функционал сайта можно посмотреть на демо-сайте http://demo.4hotels.ru//
+
+
+«БизнесПрофи: Сайт гостиницы» включает:
+
+-дистрибутив продукта (в исходных текстах)...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/bizprofi.hotel/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_bizprofi.hotel" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'bitrix.household');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Интернет-магазин бытовой техники</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/4b3/80_80_1/household.png" /></div>
+								<div class="inst-module-text-mp">Готовый интернет-магазин бытовой техники.
+
+Решение включает в себя:
+1. 2 готовых шаблона дизайна с различными цветовыми схемами.
+2. Каталог товаров бытовой техники (холодильник, пылесосы, стиральные машина и так далее)
+3...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/bitrix.household/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_bitrix.household" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'sibirix.freshshop');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Магазин в соцсетях</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/da4/80_80_1/marketplace_big.jpg" /></div>
+								<div class="inst-module-text-mp">Подробное описание http://fresh-shop.sibirix.ru/ Важно: требует наличия SSL-сертификата и cURL для PHP.
+
+По всем вопросам техподдержки (настройка модуля, устране...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/sibirix.freshshop/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_sibirix.freshshop" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'citrus.tszhsb');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">1С:Сайт управляющей компании ЖКХ, ТСЖ и ЖСК. Редакция «Малый бизнес»</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/7c4/80_80_1/malyi_biz.png" /></div>
+								<div class="inst-module-text-mp">«1С: Сайт управляющей компании ЖКХ, ТСЖ и ЖСК» — программный продукт, предназначенный для комплексного решения проблемы повышения качества обслуживания потребителей и прозрачности работы организаций в сфере жилищно-коммунального хозяйства любого ...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/citrus.tszhsb/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_citrus.tszhsb" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'citrus.tszhe');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">1С:Сайт управляющей компании ЖКХ, ТСЖ и ЖСК. Редакция «Эксперт»</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/2dd/80_80_1/expert.png" /></div>
+								<div class="inst-module-text-mp">«1С: Сайт управляющей компании ЖКХ, ТСЖ и ЖСК» — программный продукт, предназначенный для комплексного решения проблемы повышения качества обслуживания потребителей и прозрачности работы организаций в сфере жилищно-коммунального хозяйства любого ...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/citrus.tszhe/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_citrus.tszhe" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'spichka.pizzamarket');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Студия СПИЧКА: Пицца-маркет</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/4cb/80_80_1/korobka.png" /></div>
+								<div class="inst-module-text-mp">Интернет-магазин для ресторана итальянской кухни:
+- готовый сайт ресторана «Итальянской кухни»;
+- оформление заказа в режиме онлайн;
+- легкий дизайн;
+- удобная навигация.
+Открытие интернет-магазина – быстро и п...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/spichka.pizzamarket/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_spichka.pizzamarket" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'spichka.pirogimarket');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Студия СПИЧКА: Пироги-маркет</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/32b/80_80_1/korobka.png" /></div>
+								<div class="inst-module-text-mp">Интернет-магазин для ресторана русской кухни:
+- готовый сайт ресторана «Русской кухни»;
+- оформление заказа в режиме онлайн;
+- легкий дизайн;
+- удобная навигация.
+Открытие интернет-магазина – быстро и просто. За...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/spichka.pirogimarket/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_spichka.pirogimarket" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'online.college');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Портал колледжа</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/bd7/80_80_1/logo.png" /></div>
+								<div class="inst-module-text-mp">Программный продукт «Портал колледжа» представляет собой готовый шаблон типового сайта учебного заведения. Шаблон позволяет организовать обмен с программой управления учебным заведением «1С:Колледж».
+
+Шаблон позволяет быстро с нуля развернуть ...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/online.college/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_online.college" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'bitrix.fishing');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Интернет-магазин товаров для рыбалки, охоты и отдыха</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/9d6/80_80_1/9391812_s.jpg" /></div>
+								<div class="inst-module-text-mp">Интернет-магазин товаров для рыбалки, охоты и отдыха.
+Включает в себя:
+1. Шаблон с тремя цветовыми схемами.
+2. Демонстрационный каталог товаров для рыбалки, охоты и отдыха (лодки, снасти, палатки, оружие и прочее).
+3...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/bitrix.fishing/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_bitrix.fishing" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'citrus.nkostart');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">ВДГБ: Сайт некоммерческой организации. Редакция «Старт»</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/6c9/80_80_1/preview.gif" /></div>
+								<div class="inst-module-text-mp">Программный продукт [B]ВДГБ: Сайт некоммерческой организации [/B]предназначен для создания собственного сайта Фондом, Ассоциацией или Союзом (Объединением).
+
+Главное преимущество тиражного решения — его быстрый старт в сети...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/citrus.nkostart/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_citrus.nkostart" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'citrus.nkostandard');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">ВДГБ: Сайт некоммерческой организации. Редакция «Стандарт»</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/3ad/80_80_1/preview.gif" /></div>
+								<div class="inst-module-text-mp">Программный продукт [B]ВДГБ: Сайт некоммерческой организации [/B]предназначен для создания собственного сайта Фондом, Ассоциацией или Союзом (Объединением). Главное преимущество тиражного решения — его быстрый старт в сети Интерн...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/citrus.nkostandard/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_citrus.nkostandard" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'bitrix.mobile');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Интернет-магазин мобильных телефонов</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/152/80_80_1/8.JPG" /></div>
+								<div class="inst-module-text-mp">Готовый интернет-магазин мобильных телефонов и гаджетов
+
+Включает в себя:
+1. Два шаблона дизайна с тремя цветовыми схемами
+2. Демонстрационный каталог товаров (телефоны, планшетные компьютеры, аксессуары)
+3. ...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/bitrix.mobile/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_bitrix.mobile" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'vdgb.softshop');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">ВДГБ: Универсальный магазин небольших товаров</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/09f/80_80_1/sdf.png" /></div>
+								<div class="inst-module-text-mp">Данный магазин на платформе 1С-Битрикс представляет собой универсальное решение для любых товаров, относящихся к категории «небольших», то есть тех, для которых не является решающим их форма, вид с разных сторон, или богатая цветовая палитра м...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/vdgb.softshop/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_vdgb.softshop" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'sozdavatel.first');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Интернет-магазин №1 + видеокурс</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/67b/80_80_1/box-mp-big-first6_video.jpg" /></div>
+								<div class="inst-module-text-mp">Готовый интернет-магазин и пошаговый видеокурс
+всего 19800 = 4900 («Старт») + 14900 («Интернет-магазин №1»).
+
+Видео: http://www.youtube.com...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/sozdavatel.first/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_sozdavatel.first" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'prmedia.minimarket');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Минимаркет</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/48f/80_80_1/minimarket.jpg" /></div>
+								<div class="inst-module-text-mp">«Минимаркет» - простое и удобное решение для небольших магазинов, таких как продуктовые магазины, а также магазины, продающие фрукты, цветы, кофе, чай и многое другое. 
+
+Возможности
+
+• три цветовые схемы
+• каталог с возмож...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/prmedia.minimarket/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_prmedia.minimarket" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'advent.doctor');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Сайт стоматологии</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/update/54d/icon2.png" /></div>
+								<div class="inst-module-text-mp">Представляем вам решение для стоматологических клиник и медицинских организаций, данное решение впитало в себя весь опыт разработки и анализа на рынке решений для стоматологических клиник и кабинетов. Качество и доступность данного решения обуслав...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/advent.doctor/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_advent.doctor" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'aniart.foto');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Магазин фототехники</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/afe/80_80_1/pic2.jpg" /></div>
+								<div class="inst-module-text-mp">Готовый интернет-магазин «Фототехника».
+
+Этот магазин действительно продает! Невероятно удобная корзина и процедура заказа. Магазин уже включает в себя много компонентов продающего маркетинга и предусмотрено подключение дополнительных.
+
+Учтены...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/aniart.foto/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_aniart.foto" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'sozdavatel.sauna');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Сауна и Баня</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/752/80_80_1/sauna_box_big_video.jpg" /></div>
+								<div class="inst-module-text-mp">Готовый сайт Сауны или частной Бани.
+
+ГАРАНТИЯ на 30 дней после покупки:
+Если вас по какой-то причине не устроит новый сайт,
+мы без лишних вопросов вернем 100% оплаты за «Сауна и Баня»!
+
+Пошаговый видео...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/sozdavatel.sauna/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_sozdavatel.sauna" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'blaumer.store');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Универсальный магазин</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/16a/80_80_1/icon.jpg" /></div>
+								<div class="inst-module-text-mp">Готовый интернет-магазин, который подойдет для любой продукции.
+
+Для начала работы вам необходимо просто скачать и установить решение.
+
+Функционал:
+     1.	Реализован личный кабинет, переход по вкладкам без перезагру...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/blaumer.store/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_blaumer.store" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'softeffect.storesoftware');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Программный интернет-магазин</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/6cd/80_80_1/karzina.jpg" /></div>
+								<div class="inst-module-text-mp">Лучшее готовое решение для бизнеса по продажам в интернете. Вы получаете многофункциональный магазин с универсальной структурой и гибкими настройками, что позволяет существенно повысить эффективность работы и увеличить продажи. 
+
+Нет ограничений, подходит дл...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/softeffect.storesoftware/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_softeffect.storesoftware" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'advent.travel');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Сайт турагенства </span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/update/b25/icon.jpg" /></div>
+								<div class="inst-module-text-mp">Решение для туристических агентств. Данное решение представляет собой не просто шаблон туристической тематики, но комплекс из качественного дизайна, верстки, структуры заточенной под туризм: список туров, стран, отелей, городов. Реализована система отзывов,...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/advent.travel/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_advent.travel" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'prmedia.bs');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Книжный магазин</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/e68/80_80_1/bs.jpg" /></div>
+								<div class="inst-module-text-mp">ПЕРВОЕ РЕШЕНИЕ В MARKETPLACE С АДАПТИВНЫМ ДИЗАЙНОМ!
+
+Решение «Книжный магазин» представляет собой готовый интернет-магазин книг с адаптивным дизайном. Покупатель без труда сможет оформить заказ как из обы...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/prmedia.bs/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_prmedia.bs" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'webcom.shoes');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Интернет-магазин обуви и аксессуаров</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/165/80_80_1/ikonka.jpg" /></div>
+								<div class="inst-module-text-mp">Готовый интернет-магазин обуви и аксессуаров отвечает специфическим потребностям данной категории товаров и  имеет удобный функционал для поиска и приобретения обуви. 
+
+Внимание! В версии 1.3 мы добавили поддержку торговых предложений.
+...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/webcom.shoes/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_webcom.shoes" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'webcom.shoeslite');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Интернет-магазин обуви и аксессуаров LITE</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/8f7/80_80_1/solution.png" /></div>
+								<div class="inst-module-text-mp">Мы проанализировали потребности обувных магазинов в секторе малого бизнеса и решили выпустить облегченную версию нашего решения «Интернет-магазин обуви и аксессуаров», исключив из решения многоскладовость, уведомление о поступлении и комментарии к ...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/webcom.shoeslite/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_webcom.shoeslite" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'qwebs.taxi');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Такси Онлайн</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/215/80_80_1/taxi_online_icon_4.jpg" /></div>
+								<div class="inst-module-text-mp">Готовый сервис онлайн-заказа за  6 875 рублей (4975 руб. решение «Такси Онлайн» + 1900 руб. редакция «Первый сайт»).
+
+Что вы получаете?
+— Готовый сайт с тремя цветовыми схемами, резиновой ...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/qwebs.taxi/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_qwebs.taxi" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'sozdavatel.sushi2');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Доставка суши 2</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/c90/80_80_1/box_mp_big_sushi_v2_3.jpg" /></div>
+								<div class="inst-module-text-mp">Готовый сайт по доставке суши всего за 19 800 рублей? Легко!
+«1С-Битрикс: Старт» за 4900 рублей + «Доставка суши 2» за 14900 рублей!
+ 
+«Доставка суши» — время делать просто!
+Пошагов...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/sozdavatel.sushi2/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_sozdavatel.sushi2" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'grinkevich.elegant');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Элегант. Интернет-магазин модной одежды, обуви и аксессуаров</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/cfa/80_80_1/box.jpg" /></div>
+								<div class="inst-module-text-mp">Интернет-магазин для продажи модной одежды, обуви и аксессуаров. Взгляните демонстрационную версию магазина, чтобы оценить его удобство. Дизайн грамотно растягивается на весь экран. 
+
+Описание решения в блоге: 
+http://market...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/grinkevich.elegant/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_grinkevich.elegant" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'colors3.taxi');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Адаптивный сайт службы такси (диспетчерской)</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/a07/80_80_1/1-glavnaya-_-960.jpg" /></div>
+								<div class="inst-module-text-mp">Предлагаем вашему вниманию адаптивный сайт службы такси (приспосабливается к размеру экрана пользователя)!
+
+В состав готового решения входят:
+- Полностью готовый и наполненный информацией сайт
+- Несколько готовых адаптивных шаблонов на ...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/colors3.taxi/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_colors3.taxi" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'ceolab.mfo');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Готовое решение для микрофинансовых организаций</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/91d/80_80_1/znachok.jpg" /></div>
+								<div class="inst-module-text-mp">Готовый сайт для микрофинансовых организаций, который позволит в короткие сроки организовать присутствие в сети Интернет и начать
+полноценную работу с заемщиками.
+В состав решения включен компонент &quot;Калькулятор займов&quot; для реал...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/ceolab.mfo/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_ceolab.mfo" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><tr>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, 'roonix.photo');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Готовый сайт для фотографов, операторов и моделей</span></div>
+							<div class="inst-module-cont">
+								<div class="inst-module-img-mp"><img alt="" src="http://www.1c-bitrix.ru/upload/resize_cache/update/128/80_80_1/depositphotos_18905261_m.jpg" /></div>
+								<div class="inst-module-text-mp">С нами Вы сможете начать свой бизнес прямо сейчас!
+
+Студия «Roonix» предлагает уникальное решение для фотографов, видеоператоров, фотосудий и моделей. С его помощью в течение буквально нескольких минут Вы сможете получить готовый, удоб...</div>
+							</div><div class="inst-module-footer"><a class="inst-module-more" href="http://marketplace.1c-bitrix.ru/solutions/roonix.photo/" target="_blank">Подробнее</a></div>
+							<input type="radio" id="id_radio_roonix.photo" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td>
+				<td class="inst-module-cell">
+					<div class="inst-module-block" onclick="SelectSolutionMP(this, '');" ondblclick="document.forms['__wizard_form'].submit();">
+							<div class="inst-module-title"><span class="inst-module-title-alignment"></span><span class="inst-module-title-text">Не загружать</span></div>
+							<div class="inst-module-cont">
+								
+								<div class="inst-module-text-mp"></div>
+							</div>
+							<input type="radio" id="id_radio_" name="redio" class="inst-module-checkbox" />
+					</div>
+				</td></tr><td></td></tr></table>
+		<input type="hidden" id="id___wiz_selected_module" name="__wiz_selected_module" value="">
+								</div>
+								<div class="instal-btn-wrap">
+									<input type="submit" class="wizard-next-button" name="StepNext" value="Далее">
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="installer-block-cell-left installer-block-cell-bottom"><img src="/bitrix/images/install/ru/logo.png" alt="" /></td>
+							<td class="installer-block-cell-right installer-block-cell-bottom"></td>
+						</tr>
+					</table>
+					</form>
+				</div>
+				<div class="installer-footer">
+					<div class="instal-footer-left-side">&copy; 2002 &laquo;Битрикс&raquo;, 2007-2013 &laquo;1С-Битрикс&raquo;</div>
+					<div class="instal-footer-right-side"><a href="/readme.php" target="_blank">Инструкции по установке</a> <span class="instal-footer-separator"></span> <a href="http://www.1c-bitrix.ru/?referer1=bsm&referer2=install" target="_blank">www.1c-bitrix.ru</a> <span class="instal-footer-separator"></span> <a href="http://www.1c-bitrix.ru/support/?referer1=bsm&referer2=install" target="_blank">Техподдержка</a></div>
+				</div>
+			</div>
+		</td>
+	</tr>
+</table>
+<script type="text/javascript">PreloadImages();</script>
+<div class="instal-bg"><div class="instal-bg-inner"></div></div>
+</body>
+</html>

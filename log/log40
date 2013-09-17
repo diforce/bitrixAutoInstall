@@ -1,0 +1,1 @@
+[response]window.ajaxForm.SetStatus('97'); window.ajaxForm.Post('remove_misc', 'single','Удаление временных файлов');[/response]

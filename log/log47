@@ -1,0 +1,1 @@
+[response]window.ajaxForm.SetStatus('80'); window.ajaxForm.Post('do_load_wizard', 'nsandrey.emptyinstall','Загрузка мастера');[/response]

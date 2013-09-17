@@ -1,0 +1,1 @@
+[response]window.ajaxForm.SetStatus('89'); window.ajaxForm.Post('remove_mysql', 'single','Удаление временных файлов (MySQL)');[/response]

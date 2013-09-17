@@ -1,0 +1,450 @@
+HTTP/1.1 200 OK
+Date: Mon, 16 Sep 2013 20:15:33 GMT
+Server: Apache/2.2.22 (Ubuntu)
+X-Powered-By: PHP/5.3.10-1ubuntu3.8
+P3P: policyref="/bitrix/p3p.xml", CP="NON DSP COR CUR ADM DEV PSA PSD OUR UNR BUS UNI COM NAV INT DEM STA"
+X-Powered-CMS: Bitrix Site Manager (99db62a5738977cb1a4186a3c92f4c74)
+Expires: Thu, 19 Nov 1981 08:52:00 GMT
+Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+Pragma: no-cache
+Vary: Accept-Encoding
+Transfer-Encoding: chunked
+Content-Type: text/html; charset=UTF-8
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>1С-Битрикс: Пустой сайт</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<link rel="stylesheet" href="/bitrix/images/install/installer_style.css">
+		<style type="text/css">
+			
+			
+			#solution-preview
+			{
+				margin-top: 10px;
+			}
+			
+			#solution-preview div.solution-inner-item, 
+			#solution-preview b 
+			{
+				background-color:#F7F7F7;
+			}
+			
+			#solution-preview div.solution-inner-item
+			{
+				padding: 10px;
+				text-align: center;
+			}
+			
+			#solution-preview-image
+			{
+				border: 1px solid #CFCFCF;
+				width: 450px;
+			}
+			
+			/* Round Corners */
+			.r0, .r1, .r2, .r3, .r4 { overflow: hidden; font-size:1px; display: block; height: 1px;}
+			.r4 { margin: 0 4px; }
+			.r3 { margin: 0 3px; }
+			.r2 { margin: 0 2px; }
+			.r1 { margin: 0 1px; }
+			div.wizard-input-form-block
+			{
+				margin-bottom:30px;
+			}
+			
+			div.wizard-input-form-block h4
+			{
+				font-size:14px;
+				margin-bottom:12px;
+				color: #5E7CAD;
+			}
+			
+			div.wizard-input-form-block-content
+			{
+				margin-left: 30px;
+				margin-bottom: 25px;
+				zoom:1;
+			}
+			
+			div.wizard-input-form-block-content img
+			{
+				border: solid 1px #D6D6D6;
+				margin-bottom: 5px;
+			}
+			
+			div.wizard-input-form-block-content img.no-border
+			{
+				border: none;
+			}		
+			
+			div.wizard-input-form-field-text input,
+			div.wizard-input-form-field-textarea textarea,
+			div.wizard-input-form-field-file input
+			{
+				width: 90% !important;
+				border: solid 1px #CECECE;
+				background-color: #F5F5F5;
+				padding: 3px;
+
+				font: 100%/100% Arial, sans-serif;
+				float: left;
+			}
+			
+			div.wizard-input-form-field-desc
+			{
+				color: rgb(119, 119, 119);
+				zoom:1;
+			}
+
+			div.wizard-input-form-field
+			{
+				overflow: hidden;
+				margin-bottom: 5px;
+			}
+		</style>
+
+		<noscript>
+			<style type="text/css">
+				div {display: none;}
+				#noscript {padding: 3em; font-size: 130%; background:white; display:block;}
+			</style>
+			<p id="noscript">Для установки продукта необходимо включить JavaScript. По-видимому, JavaScript либо не поддерживается браузером, либо отключен. Измените настройки браузера и затем <a href="">повторите попытку</a>.</p>
+		</noscript>
+
+		<script type="text/javascript">
+		<!--
+
+			function SubmitForm(button)
+			{
+				var buttons = {
+					"next" : "StepNext",
+					"prev" : "StepPrevious",
+					"cancel" : "StepCancel",
+					"finish" : "StepFinish"
+				};
+
+				var form = document.forms["__wizard_form"];
+				if (form)
+				{
+					hiddenField = document.createElement("INPUT");
+					hiddenField.type = "hidden";
+					hiddenField.name = buttons[button];
+					hiddenField.value = button;
+					form.appendChild(hiddenField);
+					form.submit();
+				}
+
+				return false;
+
+			}
+			function CancelBubble(event)
+{
+	if (event.stopPropagation)
+	{
+		event.preventDefault();
+		event.stopPropagation();
+	}
+	else
+	{
+		event.cancelBubble = true;
+		event.returnValue = false;
+	}
+}
+
+function htmlspecialchars(str)
+{
+	if (typeof(str)!='string')
+		return str;
+	str = str.replace(/&/g, '&amp;');
+	str = str.replace(/"/g, '&quot;');
+	str = str.replace(/</g, '&lt;');
+	str = str.replace(/>/g, '&gt;');
+	return str;
+}
+
+function strip_tags(str)
+{
+	return str.replace(/<\/?[^>]+>/gi, '');
+}
+
+
+function CAjaxForm(formName, target, hiddenField)
+{
+	var form = document.forms[formName];
+	if (!form)
+		 form = document.getElementById(formName);
+
+	this.nextStep = form.elements[hiddenField];
+	this.nextStepStage = form.elements[hiddenField+"Stage"];
+	this.iframe = document.getElementById(target);
+	this.form = form;
+	this.form.target = target;
+	var _this = this;
+
+	if (this.iframe.attachEvent) //IE
+		this.iframe.attachEvent("onload", function() {_this.AjaxHandler()});
+	else
+		this.iframe.onload = function() {_this.AjaxHandler()};
+
+	this.percent = null;
+	this.percent2 = null;
+	this.indicator = null;
+	this.status = null;
+}
+
+CAjaxForm.prototype.AjaxHandler = function()
+{
+	//opera triggers onload event even on empty iframe
+	if(this.iframe.contentWindow && this.iframe.contentWindow.location.href.indexOf('http') != 0)
+		return;
+
+	if (this.iframe.contentDocument)
+		var iframeDocument = this.iframe.contentDocument;
+	else
+		var iframeDocument = this.iframe.contentWindow.document;
+
+	var response = iframeDocument.body.innerHTML;
+	if (response.length == 0 || iframeDocument.getElementById("bitrix_install_template"))
+	{
+		this.ShowError("Connection error. Empty response.");
+		return;
+	}
+
+	var regexpStart = new RegExp('\\[response\\]', 'i');
+	var regexpEnd = new RegExp('\\[\/response\\]', 'i');
+
+	var matchResponse = response.match(regexpStart);
+
+	if (matchResponse === null)
+	{
+		this.ShowError(response);
+		return;
+	}
+
+	var start = matchResponse.index + matchResponse[0].length;
+	var end = response.search(regexpEnd);
+	if (end == -1)
+	{
+		this.ShowError(response);
+		return;
+	}
+
+	response = response.substr(start, end-start);
+
+	//if (window.execScript)
+	//	window.execScript(response, 'javascript');
+	//else
+	window.eval(response);
+}
+
+CAjaxForm.prototype.ShowError = function(errorMessage)
+{
+	var errorContainer = document.getElementById("error_container");
+	var errorText = document.getElementById("error_text");
+	if (!errorContainer || !errorText)
+		return;
+
+	var waitWindow = document.getElementById("wait");
+	if (waitWindow)
+		waitWindow.style.display = "none";
+
+	errorContainer.style.display = 'block';
+	errorText.innerHTML = strip_tags(errorMessage);
+
+	var retryButton = document.getElementById("error_retry_button");
+	var skipButton = document.getElementById("error_skip_button");
+
+	var _this = this;
+	var nextStep = this.nextStep.value;
+	var nextStepStage = this.nextStepStage.value;
+
+	retryButton.onclick = function() {_this.HideError(); _this.Post(nextStep, nextStepStage,'');};
+
+	if (nextStep == "main")
+		skipButton.onclick = function() {_this.HideError(); _this.Post(nextStep, nextStepStage,'');};
+	else
+		skipButton.onclick = function() {_this.HideError(); _this.Post(nextStep, 'skip','');};
+}
+
+CAjaxForm.prototype.HideError = function()
+{
+	var errorContainer = document.getElementById("error_container");
+	var errorText = document.getElementById("error_text");
+	if (!errorContainer || !errorText)
+		return;
+
+	while (errorText.firstChild)
+		errorText.removeChild(errorText.firstChild);
+	
+	errorContainer.style.display = 'none';
+
+	var waitWindow = document.getElementById("wait");
+	if (waitWindow)
+		waitWindow.style.display = "block";
+}
+
+CAjaxForm.prototype.Post = function(nextStep, nextStepStage, status)
+{
+	if (nextStep)
+		this.nextStep.value = nextStep;
+
+	if (nextStepStage)
+		this.nextStepStage.value = nextStepStage;
+
+	this.form.submit();
+
+	if (!this.status)
+		this.status = document.getElementById("status");
+
+	if (status.length > 0)
+		this.status.innerHTML = status + "...";
+}
+
+CAjaxForm.prototype.StopAjax = function()
+{
+	this.iframe.onload = null;
+	this.form.target = "_self";
+}
+
+CAjaxForm.prototype.SetStatus = function(percent)
+{
+	if (!this.percent)
+		this.percent = document.getElementById("percent");
+
+	if (!this.percent2)
+		this.percent2 = document.getElementById("percent2");
+
+	if (!this.indicator)
+		this.indicator = document.getElementById("indicator");
+
+	this.percent.innerHTML = percent + "%";
+	this.percent2.innerHTML = percent + "%";
+	this.indicator.style.width = percent + "%";
+}
+
+
+function PreloadImages(path)
+{
+	var preloadImages = ["prev.gif", "error.gif", "wait.gif", "admin.gif", "public.gif"];
+
+	for (var imageIndex = 0; imageIndex < preloadImages.length; imageIndex++)
+	{
+		var imageObj = new Image();
+		imageObj.src = path + preloadImages[imageIndex];
+	}
+}
+
+		//-->
+		</script>
+
+
+	</head>
+
+<body id="bitrix_install_template">
+<table class="installer-main-table" id="container">
+	<tr>
+		<td class="installer-main-table-cell">
+			<div class="installer-block-wrap">
+				<div class="installer-block">
+					<form action="/" enctype="multipart/form-data" method="post" name="__wizard_form" id="__wizard_form"><input type="hidden" name="CurrentStepID" value="set_modules"><input type="hidden" name="__wiz_b_modules[iblock]" value="Информационные блоки">
+			<input type="hidden" name="__wiz_b_modules[compression]" value="Компрессия">
+			<input type="hidden" name="__wiz_b_modules[perfmon]" value="Модуль производительности">
+			<input type="hidden" name="__wiz_b_modules[bitrixcloud]" value="Облако &quot;1С-Битрикс&quot;">
+			<input type="hidden" name="__wiz_b_modules[clouds]" value="Облачные хранилища">
+			<input type="hidden" name="__wiz_b_modules[search]" value="Поиск">
+			<input type="hidden" name="__wiz_b_modules[seo]" value="Поисковая оптимизация">
+			<input type="hidden" name="__wiz_b_modules[socialservices]" value="Социальные сервисы">
+			<input type="hidden" name="__wiz_templateName" value="Пустой шаблон">
+			<input type="hidden" name="__wiz_templateDescription" value="Пустой шаблон для сайта">
+			<input type="hidden" name="__wiz_templateDir" value="empty">
+			<input type="hidden" name="__wiz_siteName" value="Название сайта">
+			<input type="hidden" name="__wiz_siteMetaTitle" value="Title">
+			<input type="hidden" name="__wiz_siteMetaDescription" value="Description">
+			<input type="hidden" name="__wiz_siteMetaKeywords" value="Keywords">
+			<input type="hidden" name="NextStepID" value="install_step">
+					<table class="installer-block-table">
+						<tr>
+							<td class="installer-block-cell-left">
+								<table class="inst-left-side-img-table">
+									<tr>
+										<td class="inst-left-side-img-cell"><img src="/bitrix/wizards/nsandrey/empty_install/images/ru/box.jpg" alt="" /></td>
+									</tr>
+								</table>
+								<div class="inst-sequence-steps">
+			<div class="inst-sequence-step-item inst-past-stage"><span class="inst-sequence-step-num">1</span><span class="inst-sequence-step-text">Настройка шаблона</span></div>
+			<div class="inst-sequence-step-item inst-past-stage"><span class="inst-sequence-step-num">2</span><span class="inst-sequence-step-text">Настройка решения</span></div>
+			<div class="inst-sequence-step-item inst-active-step"><span class="inst-sequence-step-num">3</span><span class="inst-sequence-step-text">Настройка модулей</span></div>
+			<div class="inst-sequence-step-item"><span class="inst-sequence-step-num">4</span><span class="inst-sequence-step-text">Установка</span></div>
+			<div class="inst-sequence-step-item"><span class="inst-sequence-step-num">5</span><span class="inst-sequence-step-text">Завершение установки</span></div></div>
+							</td>
+							<td class="installer-block-cell-right">
+								<div class="inst-title-block">
+									<div class="inst-title">Настройка продукта<br>&laquo;1С-Битрикс: Управление сайтом 12.5&raquo;</div>
+								</div>
+								<div class="inst-cont-title-wrap">
+									<div class="inst-cont-title">Настройка модулей</div>
+								</div>
+								<div id="step-content">
+									
+									<div class="wizard-input-form">
+								<div class="wizard-input-form-block">
+									<h4><label for="siteName">Установить модули</label></h4>
+									<div class="wizard-input-form-block-content"><input name="__wiz_install" value="" type="hidden" /><input name="__wiz_install[]" type="checkbox" value="iblock" /> Информационные блоки<br /><input name="__wiz_install[]" type="checkbox" value="compression" /> Компрессия<br /><input name="__wiz_install[]" type="checkbox" value="perfmon" /> Модуль производительности<br /><input name="__wiz_install[]" type="checkbox" value="bitrixcloud" /> Облако "1С-Битрикс"<br /><input name="__wiz_install[]" type="checkbox" value="clouds" /> Облачные хранилища<br /><input name="__wiz_install[]" type="checkbox" value="search" /> Поиск<br /><input name="__wiz_install[]" type="checkbox" value="seo" /> Поисковая оптимизация<br /><input name="__wiz_install[]" type="checkbox" value="socialservices" /> Социальные сервисы<br /><br><a href="" onclick="checkAllModules(); return false;">�������� ���</a> | <a href="" onclick="uncheckAllModules(); return false;">����� ���������</a>
+									</div>
+								</div>
+							</div>
+							<script type="text/javascript">
+								function checkAllModules()
+								{
+									var inputs = document.getElementsByTagName("input"); 
+									for (var i = 0; i < inputs.length; i++)
+									{  
+										if (inputs[i].type == "checkbox")
+										{  
+											if (!inputs[i].checked)
+												inputs[i].checked = true;
+										}  
+									}
+								}
+								
+								function uncheckAllModules()
+								{
+									var inputs = document.getElementsByTagName("input"); 
+									for (var i = 0; i < inputs.length; i++)
+									{  
+										if (inputs[i].type == "checkbox")
+										{  
+											if (inputs[i].checked)
+												inputs[i].checked = false;
+										}  
+									}
+								}
+							</script>
+								</div>
+								<div class="instal-btn-wrap">
+									<input type="submit" class="wizard-next-button" name="StepNext" value="Настройка решения">
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="installer-block-cell-left installer-block-cell-bottom"><img src="/bitrix/wizards/nsandrey/empty_install/images/ru/logo.gif" alt="" /></td>
+							<td class="installer-block-cell-right installer-block-cell-bottom"></td>
+						</tr>
+					</table>
+					</form>
+				</div>
+				<div class="installer-footer">
+					<div class="instal-footer-left-side">&copy; 2002 &laquo;Битрикс&raquo;, 2007-2013 &laquo;1С-Битрикс&raquo;</div>
+					<div class="instal-footer-right-side"><a href="http://www.1c-bitrix.ru/?referer1=bsm&referer2=install" target="_blank">www.1c-bitrix.ru</a> | <a href="http://www.1c-bitrix.ru/support/?referer1=bsm&referer2=install" target="_blank">Техподдержка</a></div>
+				</div>
+			</div>
+		</td>
+	</tr>
+</table>
+<script type="text/javascript">PreloadImages("/bitrix/images/main/wizard_sol/");</script>
+<div class="instal-bg"><div class="instal-bg-inner"></div></div>
+</body>
+</html>

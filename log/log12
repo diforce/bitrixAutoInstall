@@ -1,0 +1,1 @@
+[response]window.ajaxForm.SetStatus('21'); window.ajaxForm.Post('bitrixcloud', 'files','Установка модуля &quot;Облако 1С-Битрикс&quot; (файлы)');[/response]

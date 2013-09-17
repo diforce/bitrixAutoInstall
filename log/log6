@@ -1,0 +1,1 @@
+[response]window.ajaxForm.SetStatus('5'); window.ajaxForm.Post('main', 'files','Установка главного модуля (файлы)');[/response]

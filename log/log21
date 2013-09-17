@@ -1,0 +1,1 @@
+[response]window.ajaxForm.SetStatus('45'); window.ajaxForm.Post('fileman', 'files','Установка модуля &quot;Управление структурой&quot; (файлы)');[/response]

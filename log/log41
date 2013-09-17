@@ -1,0 +1,1 @@
+[response]window.onbeforeunload = null; window.ajaxForm.StopAjax();window.ajaxForm.SetStatus('100'); window.ajaxForm.Post('__finish', '','Установка завершена');[/response]

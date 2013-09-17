@@ -1,0 +1,1 @@
+[response]window.ajaxForm.SetStatus('32'); window.ajaxForm.Post('compression', 'utf8','Установка модуля &quot;Компрессия&quot; (UTF-8)');[/response]

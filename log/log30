@@ -1,0 +1,1 @@
+[response]window.ajaxForm.SetStatus('70'); window.ajaxForm.Post('search', 'files','Установка модуля &quot;Поиск&quot; (файлы)');[/response]

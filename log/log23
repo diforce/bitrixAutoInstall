@@ -1,0 +1,1 @@
+[response]window.ajaxForm.SetStatus('51'); window.ajaxForm.Post('iblock', 'database','Установка модуля &quot;Информационные блоки&quot; (данные БД)');[/response]

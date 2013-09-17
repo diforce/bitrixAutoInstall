@@ -1,0 +1,1 @@
+[response]window.ajaxForm.SetStatus('13'); window.ajaxForm.Post('bitrix.sitecorporate', 'files','Установка модуля &quot;Корпоративный сайт услуг&quot; (файлы)');[/response]

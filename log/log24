@@ -1,0 +1,1 @@
+[response]window.ajaxForm.SetStatus('54'); window.ajaxForm.Post('iblock', 'files','Установка модуля &quot;Информационные блоки&quot; (файлы)');[/response]

@@ -1,0 +1,1 @@
+[response]window.ajaxForm.SetStatus('91'); window.ajaxForm.Post('remove_mssql', 'single','Удаление временных файлов (MS SQL Server)');[/response]

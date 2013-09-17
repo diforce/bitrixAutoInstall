@@ -1,0 +1,1 @@
+[response]window.ajaxForm.SetStatus('2'); window.ajaxForm.Post('main', 'database','Установка главного модуля (данные БД)');[/response]

@@ -1,0 +1,1 @@
+[response]window.ajaxForm.SetStatus('24'); window.ajaxForm.Post('clouds', 'utf8','Установка модуля &quot;Облачные хранилища&quot; (UTF-8)');[/response]

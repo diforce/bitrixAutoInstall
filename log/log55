@@ -1,0 +1,14 @@
+HTTP/1.1 200 OK
+Date: Mon, 16 Sep 2013 20:15:34 GMT
+Server: Apache/2.2.22 (Ubuntu)
+X-Powered-By: PHP/5.3.10-1ubuntu3.8
+P3P: policyref="/bitrix/p3p.xml", CP="NON DSP COR CUR ADM DEV PSA PSD OUR UNR BUS UNI COM NAV INT DEM STA"
+X-Powered-CMS: Bitrix Site Manager (99db62a5738977cb1a4186a3c92f4c74)
+Expires: Thu, 19 Nov 1981 08:52:00 GMT
+Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+Pragma: no-cache
+Vary: Accept-Encoding
+Content-Length: 328
+Content-Type: text/html; charset=UTF-8
+
+[response]window.ajaxForm.SetStatus('20'); window.ajaxForm.Post('3', 'skip', 'Установка модуля: Информационные блоки');[/response][response]window.ajaxForm.SetStatus('20'); window.ajaxForm.Post('3', 'skip', 'Установка модуля: Информационные блоки');[/response]

@@ -1,0 +1,1 @@
+[response]window.ajaxForm.SetStatus('75'); window.ajaxForm.Post('seo', 'database','Установка модуля &quot;Поисковая оптимизация&quot; (данные БД)');[/response]

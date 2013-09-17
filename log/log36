@@ -1,0 +1,1 @@
+[response]window.ajaxForm.SetStatus('86'); window.ajaxForm.Post('socialservices', 'files','Установка модуля &quot;Социальные сервисы&quot; (файлы)');[/response]

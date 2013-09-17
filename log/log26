@@ -1,0 +1,1 @@
+[response]window.ajaxForm.SetStatus('59'); window.ajaxForm.Post('perfmon', 'database','Установка модуля &quot;Монитор производительности&quot; (данные БД)');[/response]

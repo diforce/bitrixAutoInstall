@@ -1,0 +1,1 @@
+[response]window.ajaxForm.SetStatus('48'); window.ajaxForm.Post('iblock', 'utf8','Установка модуля &quot;Информационные блоки&quot; (UTF-8)');[/response]

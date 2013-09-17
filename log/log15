@@ -1,0 +1,1 @@
+[response]window.ajaxForm.SetStatus('29'); window.ajaxForm.Post('clouds', 'files','Установка модуля &quot;Облачные хранилища&quot; (файлы)');[/response]

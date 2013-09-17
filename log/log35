@@ -1,0 +1,1 @@
+[response]window.ajaxForm.SetStatus('83'); window.ajaxForm.Post('socialservices', 'database','Установка модуля &quot;Социальные сервисы&quot; (данные БД)');[/response]

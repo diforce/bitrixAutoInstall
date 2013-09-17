@@ -1,0 +1,1 @@
+[response]window.ajaxForm.SetStatus('10'); window.ajaxForm.Post('bitrix.sitecorporate', 'database','Установка модуля &quot;Корпоративный сайт услуг&quot; (данные БД)');[/response]

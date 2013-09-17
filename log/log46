@@ -1,0 +1,1 @@
+[response]window.ajaxForm.SetStatus('40'); window.ajaxForm.Post('do_install_module', 'nsandrey.emptyinstall','Установка решения');[/response]

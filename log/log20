@@ -1,0 +1,1 @@
+[response]window.ajaxForm.SetStatus('43'); window.ajaxForm.Post('fileman', 'database','Установка модуля &quot;Управление структурой&quot; (данные БД)');[/response]

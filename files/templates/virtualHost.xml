@@ -1,0 +1,10 @@
+<VirtualHost *:80>
+        ServerName #vhost#
+        DocumentRoot #dir#
+        <IfModule mod_php5.c>
+            php_value default_charset utf-8
+            php_admin_value mbstring.func_overload 2
+            php_value mbstring.internal_encoding utf-8
+            php_admin_value realpath_cache_size "4096k"
+        </IfModule>
+</VirtualHost>
